@@ -34,7 +34,7 @@ _kubectl delete namespace __app-ns__
 
 Here we have two Containers, one represents the logic of the application, while the other handles logging information. The pod is created using:
 
-_kubectl create -f_ __fileManifest__._yml_ , where the two Containers are defined, they both are mounted using the same volume, here called `logs`, initialized to an empty volume
+_kubectl create -f_ __fileManifest__._yml_ , where the two Containers are defined, they both are mounted using the same volume, here called `logs`, initialized to an empty volume (which is destroyed when the pod is taken down, usually volumes are permanent but `emptyDir` behaves this way)
 
 As defined inside the manifest, the __app__ Container is saving the `date` variable inside the `date.txt` file, we want to use the __sidecar__ Container to access the file
 
@@ -59,7 +59,7 @@ These are used to execute the logic contained inside the Container a fixed amoun
 
 _kubectl get jobs_ shows the jobs that Kubernetes is handling, how many times it has already completed, how much time it took and how much time has elapsed since the job has finished
 
-# ReplicaSet and ReplicationController
+# ReplicaSet
 
 These can be used to scale automatically the app using more replicas that can be dinamically created and destroyed. Inside the `spec` we need to specify:
 - `replicas` is the maximem number of replicas
@@ -71,3 +71,7 @@ _kubectl create -f_ __FileManifest__._yml_
 If the number of replicas needs to be changed dinamically without taking down the Pod we can use:
 
 _kubectl scale rc __ReplicaSet__ --replicas=_ __NumReplicas__
+
+ReplicaSet and ReplicationController differ in how they match the labels of the Pod they manage:
+- ReplicationController only allow matches to pods that include a certain label (the label specified in the `selector` of the ReplicationController must match the label inside the template of the Containers it manages)
+- ReplicaSet extends this mechanism to match pods that lack a certain label or pods that include a certain label key, regardless of its value, using the keywords `In` and `NotIn` for matchings based on values, `Exists` and `DoesNotExist`
